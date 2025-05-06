@@ -1,0 +1,15 @@
+# Используем Node.js 21
+FROM node:21
+
+# Рабочая директория
+WORKDIR /usr/src/app
+
+# Копируем package.json и установим ВСЕ зависимости
+COPY package*.json ./
+RUN npm ci
+
+# Копируем исходные файлы
+COPY . .
+
+# Команда по умолчанию для запуска в dev-режиме
+CMD ["npm", "run", "dev"]
