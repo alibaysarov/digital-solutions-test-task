@@ -1,4 +1,4 @@
-import type {SortAndMarked, UserResource, UsersFilter} from "./types";
+import type {SortAndMarked, UserDto, UserResource, UsersFilter} from "./types";
 
 class Api {
     BASE_URL: string = `${import.meta.env.VITE_API_URL}/api/v1`;
@@ -19,6 +19,12 @@ class Api {
     }
     async markUsers(users:number[]){
         return this.request<Record<string, string>>(`${this.BASE_URL}/users/mark`,{
+            method:"POST",
+            body:JSON.stringify({users})
+        });
+    }
+    async changeOrder(users:UserDto[]) {
+        return this.request<Record<string, string>>(`${this.BASE_URL}/users/order`,{
             method:"POST",
             body:JSON.stringify({users})
         });

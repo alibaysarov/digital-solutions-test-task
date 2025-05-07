@@ -3,13 +3,15 @@ import {SearchUserDto} from "../dtos/SearchUser";
 
 export interface SortAndMarked{
     sort:Record<string, string>,
-    marked:number[]
+    marked:number[],
+    users:UserDto[]
 }
 export interface UserService {
     getAll: () => Promise<UserDto[]>,
     searchUsers(dto:SearchUserDto): Promise<{ results: UserDto[]; total: number }>;
     getSortsAndMarked(): Promise<SortAndMarked>
     markUsers(ids:number[]):Promise<Record<string, string>>
+    cacheUsersOrder(users:UserDto[]):Promise<Record<string, string>>
 }
 
 export interface UserResource {

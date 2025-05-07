@@ -1,6 +1,6 @@
 import Header from "./components/Header";
 import Table from "./components/Table";
-import React, { useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import api from "./api.ts";
 import type {UserDto} from "./types";
 import debounce from "lodash.debounce"
@@ -14,8 +14,8 @@ function App() {
 
     const [loaded, setLoaded] = useState<boolean>(false);
     const [page, setPage] = useState<number>(1);
-    const handleLoadMore= () =>{
-        setPage(prev=>prev+1);
+    const handleLoadMore = () => {
+        setPage(prev => prev + 1);
     }
     const [sort, setSort] = useState<Record<string, string>>({})
     const handleSort = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -37,13 +37,17 @@ function App() {
         debouncedSearch(value);
     };
 
+    const handleOrderChange = (users: UserDto[]) => {
+        api.changeOrder(users)
+    }
+
 
     useEffect(() => {
         api.getSortsAndMarked()
             .then(data => {
                 setSort(data.sort);
                 setMarkedUsers(data.marked);
-                console.log("fetch users");
+
                 api.getUsers({
                     query: "",
                     sort: data.sort,
@@ -52,6 +56,7 @@ function App() {
                     setUsers(data.results);
                     setLoaded(true);
                 })
+
             })
     }, []);
 
@@ -83,7 +88,7 @@ function App() {
                 page,
                 sort: sort
             }).then(data => {
-                setUsers(prevState => [...prevState,...data.results]);
+                setUsers(prevState => [...prevState, ...data.results]);
             })
         }
     }, [page]);
@@ -116,7 +121,14 @@ function App() {
 
                     </div>
 
-                    <Table handleLoadMore={handleLoadMore} users={users} setUsers={setUsers} markedUsers={markedUsers} setMarkedUsers={setMarkedUsers}/>
+                    <Table
+                        handleOrderChange={handleOrderChange}
+                        handleLoadMore={handleLoadMore}
+                        users={users}
+                        setUsers={setUsers}
+                        markedUsers={markedUsers}
+                        setMarkedUsers={setMarkedUsers}
+                    />
 
 
                 </div>

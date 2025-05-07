@@ -45,4 +45,14 @@ export class UserController {
             res.status(500).json({error: 'Не удалось отметить пользователей'});
         }
     }
+
+    async cacheUsersOrder(req: Request, res: Response) {
+        try {
+            const data = await this.userService.cacheUsersOrder(req.body.users);
+            res.json(data);
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({error: 'Не удалось изменить порядок пользователей'});
+        }
+    }
 }

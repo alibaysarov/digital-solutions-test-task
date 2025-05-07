@@ -11,7 +11,12 @@ import redisClient from "../utils/redis";
 export default class UserServiceImpl implements UserService {
     async markUsers(ids: number[]): Promise<Record<string, string>> {
         redisClient.set("marked",JSON.stringify(ids));
-        return {"message":"users added!"}
+        return {"message":"mark on users added!"}
+    }
+
+    async cacheUsersOrder(users: UserDto[]): Promise<Record<string, string>> {
+        redisClient.set("users:order",JSON.stringify(users));
+        return {"message":"Order of users changed!"}
     }
 
     async getSortsAndMarked(): Promise<SortAndMarked> {
@@ -19,10 +24,11 @@ export default class UserServiceImpl implements UserService {
             return {
                 sort: await this.getSort(),
                 marked: await this.getMarked(),
+                users: await this.getOrderedUsers()
             };
         } catch (error) {
             console.error('Ошибка при поиске фильтров:', error);
-            return { sort: {}, marked: [] };
+            return { sort: {}, marked: [],users:[] };
         }
     }
 
@@ -32,16 +38,19 @@ export default class UserServiceImpl implements UserService {
         const size = 20;
         const from = (page - 1) * size;
         try {
-            const sortOptions = await this.processSort(sort);
+            const cachedUsers = await this.getOrderedUsers();
+            if(query == '') {
+                if( cachedUsers != null && cachedUsers.length>0) {
+                    // console.log("ordered users are ",cachedUsers);
+                    return {
+                        results:cachedUsers,
+                        total:cachedUsers.length,
+                    }
+                }
+            }
 
-                // ? {
-                //     match: {
-                //         fullName: {
-                //             query,
-                //             fuzziness: 'AUTO',
-                //         },
-                //     }
-                // }
+            redisClient.del("users:order");
+            const sortOptions = await this.processSort(sort);
             const searchQuery = query
                 ? {
                     match: {
@@ -72,6 +81,7 @@ export default class UserServiceImpl implements UserService {
                 fullName: hit._source.fullName,
                 email: hit._source.email,
             }));
+            redisClient.set("users:order",JSON.stringify(users));
             return {
                 results: users,
                 total: result.hits.hits.length??0,
@@ -106,6 +116,11 @@ export default class UserServiceImpl implements UserService {
     private async getMarked() {
         const marked = await redisClient.get("marked");
         return marked ? JSON.parse(marked) : [];
+    }
+
+    private async getOrderedUsers() {
+        const users = await redisClient.get("users:order");
+        return users ? JSON.parse(users) : [];
     }
 
     private async processSort(

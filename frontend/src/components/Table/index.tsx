@@ -12,17 +12,18 @@ import type {UserDto} from "../../types";
 
 
 interface TableProps {
-    users:UserDto[],
-    setUsers:React.Dispatch<React.SetStateAction<UserDto[]>>,
-    markedUsers:number[],
+    users: UserDto[],
+    setUsers: React.Dispatch<React.SetStateAction<UserDto[]>>,
+    markedUsers: number[],
     setMarkedUsers: React.Dispatch<React.SetStateAction<number[]>>,
-    handleLoadMore:()=>void
+    handleLoadMore: () => void,
+    handleOrderChange: (users: UserDto[]) => void
 }
 
-const Table = ({markedUsers,setMarkedUsers,users,setUsers,handleLoadMore}:TableProps) => {
+const Table = ({markedUsers, setMarkedUsers, users, setUsers, handleLoadMore, handleOrderChange}: TableProps) => {
 
-    const loadMore = useCallback(handleLoadMore,[])
-
+    const loadMore = useCallback(handleLoadMore, [])
+    const isDragging = useRef(false);
     const sensors = useSensors(
         useSensor(MouseSensor, {
             activationConstraint: {
@@ -41,6 +42,7 @@ const Table = ({markedUsers,setMarkedUsers,users,setUsers,handleLoadMore}:TableP
         const {active, over} = event;
 
         if (active.id !== over.id) {
+            isDragging.current = true;
             setUsers((items) => {
                 const oldIndex = items.findIndex(item => item.id === active.id);
                 const newIndex = items.findIndex(item => item.id === over.id);
@@ -58,6 +60,13 @@ const Table = ({markedUsers,setMarkedUsers,users,setUsers,handleLoadMore}:TableP
         }
     }
 
+    useEffect(() => {
+        if (isDragging.current) {
+            console.log("users изменились из-за drag end", users);
+            handleOrderChange(users);
+            isDragging.current = false;
+        }
+    }, [users]);
 
     const lastItemRef = useRef(null);
 
@@ -85,7 +94,7 @@ const Table = ({markedUsers,setMarkedUsers,users,setUsers,handleLoadMore}:TableP
                 observer.unobserve(currentElement);
             }
         };
-    }, [users,loadMore]);
+    }, [users, loadMore]);
 
 
     return (
@@ -98,8 +107,8 @@ const Table = ({markedUsers,setMarkedUsers,users,setUsers,handleLoadMore}:TableP
                 items={users.map(item => item.id)}
                 strategy={verticalListSortingStrategy}
             >
-                <div  className="table-items my-[30px] w-full flex flex-col gap-[10px]">
-                    {users.map((item,index) => (
+                <div className="table-items my-[30px] w-full flex flex-col gap-[10px]">
+                    {users.map((item, index) => (
                         <React.Fragment key={item.id}>
                             <TableRow
                                 isChecked={Boolean(markedUsers.find(el => el === item.id))}
@@ -108,7 +117,7 @@ const Table = ({markedUsers,setMarkedUsers,users,setUsers,handleLoadMore}:TableP
                                 fullName={item.fullName}
                             />
                             {/* Если это последний элемент — привязываем ref */}
-                            {index === users.length - 1 && <div ref={lastItemRef} />}
+                            {index === users.length - 1 && <div ref={lastItemRef}/>}
                         </React.Fragment>
                     ))}
                 </div>

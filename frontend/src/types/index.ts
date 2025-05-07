@@ -15,5 +15,6 @@ export interface UserResource {
 }
 export interface SortAndMarked{
     sort:Record<string, string>,
-    marked:number[]
+    marked:number[],
+    users:UserDto[],
 }
