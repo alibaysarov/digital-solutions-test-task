@@ -1,0 +1,56 @@
+name: Chemical Shop CI/CD
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '21'
+
+      - name: Install frontend dependencies
+        run: |
+          cd chemical-shop-backend
+          npm install
+
+      - name: Build frontend
+        run: |
+          cd chemical-shop-backend
+          npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Copy files to VPS
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          source: "."
+          target: "/home/shop/"
+
+      - name: Run test command on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            cd /home/shop/chemical-shop-backend
+            chmod -R 777 storage/
+            chmod -R 777 vendor/
+            chmod 777 .env
+            docker exec -t backend php artisan view:clear
