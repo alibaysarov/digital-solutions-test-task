@@ -10,13 +10,13 @@ import redisClient from "../utils/redis";
 @injectable()
 export default class UserServiceImpl implements UserService {
     async markUsers(ids: number[]): Promise<Record<string, string>> {
-        redisClient.set("marked",JSON.stringify(ids));
-        return {"message":"mark on users added!"}
+        redisClient.set("marked", JSON.stringify(ids));
+        return {"message": "mark on users added!"}
     }
 
     async cacheUsersOrder(users: UserDto[]): Promise<Record<string, string>> {
-        redisClient.set("users:order",JSON.stringify(users));
-        return {"message":"Order of users changed!"}
+        redisClient.set("users:order", JSON.stringify(users));
+        return {"message": "Order of users changed!"}
     }
 
     async getSortsAndMarked(): Promise<SortAndMarked> {
@@ -28,41 +28,83 @@ export default class UserServiceImpl implements UserService {
             };
         } catch (error) {
             console.error('Ошибка при поиске фильтров:', error);
-            return { sort: {}, marked: [],users:[] };
+            return {sort: {}, marked: [], users: []};
         }
     }
 
 
     async searchUsers(dto: SearchUserDto): Promise<UserResource> {
-        const {query,page,sort}= dto
+        const {query, page, sort} = dto
         const size = 20;
         const from = (page - 1) * size;
         try {
-            const cachedUsers = await this.getOrderedUsers();
-            if(query == '') {
-                if( cachedUsers != null && cachedUsers.length>0) {
-                    // console.log("ordered users are ",cachedUsers);
+            const cachedUsers: UserDto[] = await this.getOrderedUsers();
+            const lastSort = await this.getSort()
+            const changed = JSON.stringify(sort) !== JSON.stringify(lastSort);
+            if (query == '' && page == 1 && !changed) {
+                if (cachedUsers != null && cachedUsers.length > 0) {
+                    console.log("taking from cache");
                     return {
-                        results:cachedUsers,
-                        total:cachedUsers.length,
+                        results: cachedUsers,
+                        total: cachedUsers.length,
                     }
                 }
             }
-
-            redisClient.del("users:order");
-            const sortOptions = await this.processSort(sort);
-            const searchQuery = query
-                ? {
-                    match: {
-                        fullName: {
-                            query,
-                            fuzziness: 'AUTO',
+            const sortOptions = await this.processSort(sort, changed);
+            let searchQuery;
+            if (cachedUsers.length > 0) {
+                const excludedIds: number[] = cachedUsers.map(el => el.id);
+                searchQuery = query
+                    ? {
+                        bool: {
+                            must: {
+                                match: {
+                                    fullName: {
+                                        query,
+                                        fuzziness: 'AUTO',
+                                    },
+                                },
+                            },
+                            must_not: excludedIds.length > 0
+                                ? {
+                                    terms: {
+                                        _id: excludedIds,
+                                    },
+                                }
+                                : undefined,
                         },
                     }
-                }
-                : { match_all: {} };
+                    : {
+                        bool: {
+                            must: {
+                                match_all: {},
+                            },
+                            must_not: excludedIds.length > 0
+                                ? {
+                                    terms: {
+                                        _id: excludedIds,
+                                    },
+                                }
+                                : undefined,
+                        },
+                    };
+            } else {
+                searchQuery = query
+                    ? {
+                        match: {
+                            fullName: {
+                                query,
+                                fuzziness: 'AUTO',
+                            },
+                        }
+                    }
+                    : {match_all: {}};
+            }
+
+
+            console.log("sort options ", sortOptions);
             const result = await esClient.search({
-                index:'users',
+                index: 'users',
                 from,
                 size,
                 query: searchQuery,
@@ -81,14 +123,14 @@ export default class UserServiceImpl implements UserService {
                 fullName: hit._source.fullName,
                 email: hit._source.email,
             }));
-            redisClient.set("users:order",JSON.stringify(users));
+            redisClient.set("users:order", JSON.stringify(users));
             return {
                 results: users,
-                total: result.hits.hits.length??0,
+                total: result.hits.hits.length ?? 0,
             };
         } catch (error) {
             console.error('Ошибка при поиске пользователей:', error);
-            return { results: [], total: 0 };
+            return {results: [], total: 0};
         }
     }
 
@@ -100,7 +142,7 @@ export default class UserServiceImpl implements UserService {
                     email: true,
                     fullName: true,
                 },
-                take:20
+                take: 20
             })
         } catch (error) {
             console.error('Ошибка при получении записей:', error)
@@ -109,10 +151,12 @@ export default class UserServiceImpl implements UserService {
             await db.$disconnect()
         }
     }
-    private async getSort(){
+
+    private async getSort() {
         const sort = await redisClient.get("sort");
         return sort ? JSON.parse(sort) : {};
     }
+
     private async getMarked() {
         const marked = await redisClient.get("marked");
         return marked ? JSON.parse(marked) : [];
@@ -124,11 +168,11 @@ export default class UserServiceImpl implements UserService {
     }
 
     private async processSort(
-        dtoSort: Record<string, string>
+        dtoSort: Record<string, string>,
+        changed: boolean
     ): Promise<Array<Record<string, { order: 'asc' | 'desc' }>>> {
 
         const lastSort = await this.getSort();
-        const changed = JSON.stringify(lastSort) !== JSON.stringify(dtoSort);
 
         if (changed) {
             await redisClient.del("marked");
