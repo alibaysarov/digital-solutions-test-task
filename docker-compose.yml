@@ -29,7 +29,7 @@ services:
     container_name: frontend
     ports:
       - "5174:5173"
-      - "81:80"
+      - "80:80"
     volumes:
       - ./frontend:/usr/src/app
       - ./frontend/node_modules:/usr/src/app/node_modules

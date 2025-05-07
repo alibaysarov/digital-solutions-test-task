@@ -13,4 +13,4 @@ EXPOSE 80
 
 # Команда по умолчанию
 RUN npm run build
-#RUN npm run preview
+CMD ["npm", "run", "preview"]

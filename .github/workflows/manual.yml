@@ -14,23 +14,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '21'
-
-      - name: Install frontend dependencies
-        run: |
-          cd chemical-shop-backend
-          npm install
-
-      - name: Build frontend
-        run: |
-          cd chemical-shop-backend
-          npm run build
-        env:
-          NODE_ENV: production
-
       - name: Copy files to VPS
         uses: appleboy/scp-action@master
         with:
@@ -39,7 +22,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           password: ${{ secrets.SSH_PASSWORD }}
           source: "."
-          target: "/home/shop/"
+          target: "/home/test-task/"
 
       - name: Run test command on server
         uses: appleboy/ssh-action@master
@@ -49,8 +32,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
-            cd /home/shop/chemical-shop-backend
-            chmod -R 777 storage/
-            chmod -R 777 vendor/
-            chmod 777 .env
-            docker exec -t backend php artisan view:clear
+            mkdir frontend/dist && chmod -R 775 frontend/dist
+            mkdir frontend/node_modules && chmod -R 775 frontend/node_modules
+            mkdir backend/dist && chmod -R 775 backend/dist
+            docker compose -f docker-compose.yml build --no-cache
+            docker compose -f docker-compose.yml up -d
