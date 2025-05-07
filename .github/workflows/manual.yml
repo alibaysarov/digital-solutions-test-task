@@ -32,6 +32,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
+            cd /home/test-task
             mkdir frontend/dist && chmod -R 775 frontend/dist
             mkdir frontend/node_modules && chmod -R 775 frontend/node_modules
             mkdir backend/dist && chmod -R 775 backend/dist
