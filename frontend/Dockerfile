@@ -7,7 +7,7 @@ RUN npm install -g vite
 COPY package*.json ./
 RUN npm install --include=dev
 
-ENV PATH="/usr/src/app/node_modules/.bin:${PATH}"
+#ENV PATH="/usr/src/app/node_modules/.bin:${PATH}"
 # Копируем исходные файлы
 COPY . .
 EXPOSE 80
