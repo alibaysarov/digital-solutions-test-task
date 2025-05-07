@@ -1,18 +1,16 @@
-# Используем Node.js 21
-FROM node:21
+FROM node:20
 
 # Рабочая директория
 WORKDIR /usr/src/app
 
 # Копируем package.json и установим зависимости
 COPY package*.json ./
-RUN npm ci --only=development
+RUN npm install
 
 # Копируем исходные файлы
 COPY . .
-
-# Устанавливаем production-зависимости
-RUN npm ci --only=production
+EXPOSE 80
 
 # Команда по умолчанию
-CMD ["npm", "start"]
+RUN npm run build
+#RUN npm run preview

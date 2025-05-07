@@ -1,9 +1,9 @@
 import 'reflect-metadata';
-import express from 'express';
+import express, {Express} from 'express';
 import itemRoutes from './routes/itemRoutes';
 import { errorHandler } from './middlewares/errorHandler';
 import cors from "cors"
-const app = express();
+const app:Express = express();
 app.use(cors())
 app.use(express.json());
 

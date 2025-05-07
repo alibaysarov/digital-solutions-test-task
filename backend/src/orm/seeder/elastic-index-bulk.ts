@@ -1,6 +1,6 @@
 import db from "../prisma"
 import esClient from "../esClient";
-
+import {User, UserDto} from "../../models/User";
 // Конфигурация
 const BATCH_SIZE = 1000;
 const INDEX_NAME = 'users';
@@ -32,7 +32,7 @@ async function importUsersToElasticsearch() {
     let skip = 0;
 
     while (true) {
-        const users = await db.user.findMany({
+        const users:User[] = await db.user.findMany({
             skip,
             take: BATCH_SIZE,
         });

@@ -1,16 +1,20 @@
-# Stage 1: Сборка
-FROM node:21 as builder
-WORKDIR /usr/src/app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-RUN npm run build
-
-# Stage 2: Запуск
 FROM node:21
-WORKDIR /usr/src/app
-COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/package*.json ./
-RUN npm ci --only=production
 
-CMD ["npm", "run","start"]
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+COPY ./prisma prisma
+RUN npm install
+
+# If you are building your code for production
+# RUN npm ci --only=production
+
+
+RUN npm run generate
+COPY . .
+EXPOSE 3000
+
+RUN npm run build
+CMD [ "node", "dist/index.js" ]
+
+

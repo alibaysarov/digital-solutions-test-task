@@ -1,4 +1,4 @@
-import {Request, Response, NextFunction} from 'express';
+import {Request, Response} from 'express';
 import {UserDto} from "../models/User";
 import {SearchUserDto} from "../dtos/SearchUser";
 import {inject, injectable} from "inversify";
