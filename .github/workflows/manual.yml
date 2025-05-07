@@ -36,5 +36,7 @@ jobs:
             mkdir frontend/dist && chmod -R 775 frontend/dist
             mkdir frontend/node_modules && chmod -R 775 frontend/node_modules
             mkdir backend/dist && chmod -R 775 backend/dist
-            docker compose -f docker-compose.yml build --no-cache
+            chmod -R 775 frontend/package.json
+#            docker compose -f docker-compose.yml build --no-cache
+            docker compose -f docker-compose.yml build
             docker compose -f docker-compose.yml up -d
