@@ -6,17 +6,22 @@ const BATCH_SIZE = 1000;
 const INDEX_NAME = 'users';
 
 async function createIndexIfNotExists() {
-    const exists = await esClient.indices.exists({ index: INDEX_NAME });
+    const exists = await esClient.indices.exists({index: INDEX_NAME});
     if (!exists) {
         await esClient.indices.create({
             index: INDEX_NAME,
-            mappings :{
+            mappings: {
                 properties: {
-                    fullName: { type: 'text' },
-                    email: { type: 'keyword' },
-                    createdAt: { type: 'date' },
-                    updatedAt: { type: 'date' },
-                    deletedAt: { type: 'date' }
+                    fullName: {
+                        type: 'text',
+                        fields: {
+                            keyword: {type: 'keyword'}
+                        }
+                    },
+                    email: {type: 'keyword'},
+                    createdAt: {type: 'date'},
+                    updatedAt: {type: 'date'},
+                    deletedAt: {type: 'date'}
                 },
             },
         });
@@ -32,7 +37,7 @@ async function importUsersToElasticsearch() {
     let skip = 0;
 
     while (true) {
-        const users:User[] = await db.user.findMany({
+        const users: User[] = await db.user.findMany({
             skip,
             take: BATCH_SIZE,
         });
@@ -40,7 +45,7 @@ async function importUsersToElasticsearch() {
         if (users.length === 0) break;
 
         const bulkBody = users.flatMap(user => [
-            { index: { _index: INDEX_NAME, _id: user.id.toString() } },
+            {index: {_index: INDEX_NAME, _id: user.id.toString()}},
             {
                 fullName: user.fullName,
                 email: user.email,
@@ -50,7 +55,7 @@ async function importUsersToElasticsearch() {
             },
         ]);
 
-        await esClient.bulk({ body: bulkBody });
+        await esClient.bulk({body: bulkBody});
         console.log(`📤 Импортировано ${skip + users.length} записей`);
 
         skip += BATCH_SIZE;

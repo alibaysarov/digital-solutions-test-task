@@ -103,6 +103,8 @@ export default class UserServiceImpl implements UserService {
 
 
             console.log("sort options ", sortOptions);
+            const mapping = await esClient.indices.getMapping({ index: 'users' });
+            console.log("mapping ",mapping)
             const result = await esClient.search({
                 index: 'users',
                 from,
