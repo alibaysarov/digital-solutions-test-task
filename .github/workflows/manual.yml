@@ -39,5 +39,7 @@ jobs:
             mkdir backend/node_modules && chmod -R 775 backend/node_modules
             chmod -R 775 frontend/package.json
             chmod -R 775 backend/package.json
-            docker compose -f docker-compose.local.yml build --no-cache
-            docker compose -f docker-compose.local.yml up -d
+#            docker compose -f docker-compose.local.yml build --no-cache
+#            docker compose -f docker-compose.local.yml up -d
+            docker compose -f docker-compose.yml build --no-cache
+            docker compose -f docker-compose.yml up -d
