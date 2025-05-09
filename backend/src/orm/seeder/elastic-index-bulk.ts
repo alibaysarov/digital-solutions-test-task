@@ -12,6 +12,7 @@ async function createIndexIfNotExists() {
             index: INDEX_NAME,
             mappings: {
                 properties: {
+                    id: { type: 'long' },
                     fullName: {
                         type: 'text',
                         fields: {

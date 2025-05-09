@@ -42,6 +42,7 @@ const TableRow = ({id, fullName, handleCheckBox, isChecked}: TableItemProps) => 
                     onChange={() => handleCheckBox(id)}
                     className={"p-[10px] cursor-pointer"} type="checkbox"/>
             </div>
+            <p className={"text-[20px] mr-[15px]"}>{id}</p>
             <p className={"text-[20px]"}>{fullName}</p>
         </div>
     );
