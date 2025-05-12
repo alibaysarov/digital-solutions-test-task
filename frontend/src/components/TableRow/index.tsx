@@ -32,7 +32,7 @@ const TableRow = ({id, fullName, handleCheckBox, isChecked}: TableItemProps) => 
             style={style}
             {...attributes}
             {...listeners}
-            className="flex cursor-grab bg-white p-4 border rounded shadow-sm"
+            className="flex items-center cursor-grab bg-white p-4 border rounded shadow-sm max-[1024px]:gap-[5px]"
         >
             <div className="basis-[5%] relative z-50">
                 <input

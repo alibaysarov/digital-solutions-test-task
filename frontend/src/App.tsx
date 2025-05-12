@@ -97,18 +97,13 @@ function App() {
         <>
             <Header/>
 
-            <section className={"p-[30px] h-[100%]"}>
+            <section className={"p-[30px] h-[100%] max-[1024px]:p-[10px]"}>
                 <div className="mx-auto rounded-[10px] bg-white shadow-md p-[20px]">
-                    <div className="w-full flex justify-between">
-
+                    <div className="w-full flex justify-between gap-[10px] max-[1024px]:flex-col">
                         <div className="basis-[65%] flex items-center gap-[4px]">
                             <input value={inputValue} onChange={handleInputChange} type="text"
                                    className={"transform delay-125 focus:outline-gray-300 outline-1 outline-gray-400 rounded-[5px] p-[5px] grow-1"}/>
-                            <button
-                                className={"rounded-[5px] delay-125 bg-blue-400 py-[5px] px-[15px] text-white cursor-pointer hover:opacity-95"}>Поиск
-                            </button>
                         </div>
-
 
                         <div className="flex gap-2 items-center border-1 border-gray-300 px-[20px] rounded-[5px]">
                             <span>Сортировка по имени</span>
