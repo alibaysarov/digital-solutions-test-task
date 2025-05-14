@@ -66,7 +66,7 @@ export default class UserServiceImpl implements UserService {
             }
         }
         let dbQuery;
-        if (cachedUsers.length > 0) {
+        if (cachedUsers.length > 0 && page>1) {
             const excludedIds: number[] = cachedUsers.map(el => el.id);
              dbQuery = {
                 select: {
