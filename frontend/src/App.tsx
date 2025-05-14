@@ -23,7 +23,7 @@ function App() {
             setSort({})
         } else {
             setSort({
-                fullName: event.target.value
+                id: event.target.value
             });
         }
     }
@@ -107,10 +107,10 @@ function App() {
 
                         <div className="flex gap-2 items-center border-1 border-gray-300 px-[20px] rounded-[5px]">
                             <span>Сортировка по имени</span>
-                            <select value={sort.fullName} onChange={handleSort} name="fullname">
+                            <select value={sort.id} onChange={handleSort} name="id">
                                 <option value="">-- Выбрать--</option>
-                                <option value="asc">А-Я</option>
-                                <option value="desc">Я-А</option>
+                                <option value="asc">По возрастанию</option>
+                                <option value="desc">По убыванию</option>
                             </select>
                         </div>
 

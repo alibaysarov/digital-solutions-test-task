@@ -8,23 +8,88 @@ const INDEX_NAME = 'users';
 async function createIndexIfNotExists() {
     const exists = await esClient.indices.exists({index: INDEX_NAME});
     if (!exists) {
+        // await esClient.indices.create({
+        //     index: INDEX_NAME,
+        //     body:{
+        //         settings: {
+        //             analysis: {
+        //                 analyzer: {
+        //                     ngram_analyzer: {
+        //                         type: "custom",
+        //                         tokenizer: "custom_ngram_tokenizer",
+        //                         filter: ["lowercase"],
+        //                     }
+        //                 },
+        //                 tokenizer: {
+        //                     custom_ngram_tokenizer: {
+        //                         type: "ngram",
+        //                         min_gram: 2,
+        //                         max_gram: 10,
+        //                         token_chars: ["letter", "digit"],
+        //                     }
+        //                 }
+        //             }
+        //         },
+        //         mappings: {
+        //             properties: {
+        //                 fullName: {
+        //                     type: 'text',
+        //                     analyzer: 'ngram_analyzer',
+        //                     fields: {
+        //                         keyword: {type: 'keyword'}
+        //                     }
+        //                 },
+        //                 email: {type: 'keyword'},
+        //                 createdAt: {type: 'date'},
+        //                 updatedAt: {type: 'date'},
+        //                 deletedAt: {type: 'date'}
+        //             },
+        //         },
+        //     },
+        //
+        // });
+
         await esClient.indices.create({
             index: INDEX_NAME,
-            mappings: {
-                properties: {
-                    fullName: {
-                        type: 'text',
-                        fields: {
-                            keyword: {type: 'keyword'}
-                        }
+            body: {
+                settings: {
+                    analysis: {
+                        analyzer: {
+                            ngram_analyzer: {
+                                type: "custom",
+                                tokenizer: "custom_ngram_tokenizer",
+                                filter: ["lowercase"],
+                            },
+                        },
+                        tokenizer: {
+                            custom_ngram_tokenizer: {
+                                type: "ngram",
+                                min_gram: 2,
+                                max_gram: 3,
+                                token_chars: ["letter", "digit"],
+                            },
+                        },
                     },
-                    email: {type: 'keyword'},
-                    createdAt: {type: 'date'},
-                    updatedAt: {type: 'date'},
-                    deletedAt: {type: 'date'}
+                },
+                mappings: {
+                    properties: {
+                        id: { type: 'integer' },
+                        fullName: {
+                            type: "text",
+                            analyzer: "ngram_analyzer",
+                            fields: {
+                                keyword: { type: "keyword" },
+                            },
+                        },
+                        email: { type: "keyword" },
+                        createdAt: { type: "date" },
+                        updatedAt: { type: "date" },
+                        deletedAt: { type: "date" },
+                    },
                 },
             },
-        });
+        } as any);
+
         console.log(`✅ Индекс "${INDEX_NAME}" создан`);
     } else {
         console.log(`ℹ️ Индекс "${INDEX_NAME}" уже существует`);

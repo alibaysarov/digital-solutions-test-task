@@ -15,7 +15,7 @@ async function main() {
         for (let i = 0; i < TOTAL_RECORDS; i += BATCH_SIZE) {
             const users = Array.from({ length: Math.min(BATCH_SIZE, TOTAL_RECORDS - i) })
                 .map((_, index) => ({
-                    fullName: faker.person.fullName(),
+                    fullName: `${i + index + 1}`,
                     email: `${faker.string.uuid()}@${faker.internet.domainName()}`, // Уникальный email
                     password: faker.internet.password(),
                     createdAt: faker.date.past(),
